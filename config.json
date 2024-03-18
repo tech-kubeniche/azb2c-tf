@@ -1,0 +1,101 @@
+{
+"AzureADB2C": {
+    "domainName": "kubenicheb2c2.onmicrosoft.com",
+    "displayName": "MyTenant Azure Active Directory B2C - Test",
+    "countryCode": "AU",
+    "location": "Australia",
+    "skuName": "Standard",
+    "branding": {
+      "backgroundColor": "#2173A6",
+      "signInPageText": "My App - Test",
+      "usernameHintText": "someone@example.com"
+    },
+    "appRegistrations": [
+      {
+        "signInAudience": "AzureADandPersonalMicrosoftAccount",
+        "displayName": "my-app",
+        "requiredResourceAccess": [
+          {
+            "resourceAppId": "00000003-0000-0000-c000-000000000000",
+            "resourceAccess": [
+              {
+                "id": "37f7f235-527c-4136-accd-4a02d197296e",
+                "type": "Scope"
+              },
+              {
+                "id": "7427e0e9-2fba-42fe-b0c0-848c9e6a8182",
+                "type": "Scope"
+              }
+            ]
+          }
+        ],
+        "spa": {
+          "redirectUris": [
+            "https://myapp.com/auth",
+            "https://myapp.azurewebsites.net/auth"
+          ]
+        }
+      }
+    ],
+    "userFlows": [
+      {
+        "id": "B2C_1_APP",
+        "userFlowType": "signUpOrSignIn",
+        "userFlowTypeVersion": 3,
+        "isConditionalAccessEnforced": false,
+        "isJavaScriptEnabled": false,
+        "isLanguageCustomizationEnabled": false,
+        "defaultLanguageTag": null,
+        "authenticationMethods": "0",
+        "multifactorAuthenticationConfiguration": null,
+        "tokenLifetimeConfiguration": null,
+        "singleSignOnSessionConfiguration": null,
+        "passwordComplexityConfiguration": null,
+        "tokenClaimsConfiguration": null,
+        "apiConnectorConfiguration": null
+      }
+    ],
+    "userFlowAttributes": [
+      {
+        "userAttribute": {
+          "id": "email"
+        },
+        "isOptional": false,
+        "requiresVerification": true,
+        "userInputType": "emailBox",
+        "displayName": "Email Address",
+        "userAttributeValues": []
+      },
+      {
+        "userAttribute": {
+          "id": "givenName"
+        },
+        "isOptional": false,
+        "requiresVerification": false,
+        "userInputType": "textBox",
+        "displayName": "Given Name",
+        "userAttributeValues": []
+      },
+      {
+        "userAttribute": {
+          "id": "surname"
+        },
+        "isOptional": false,
+        "requiresVerification": false,
+        "userInputType": "textBox",
+        "displayName": "Surname",
+        "userAttributeValues": []
+      },
+      {
+        "userAttribute": {
+          "id": "displayName"
+        },
+        "isOptional": false,
+        "requiresVerification": false,
+        "userInputType": "textBox",
+        "displayName": "Display Name",
+        "userAttributeValues": []
+      }
+    ]
+  }
+}
