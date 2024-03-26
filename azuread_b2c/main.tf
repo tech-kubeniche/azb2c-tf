@@ -17,14 +17,14 @@ resource "azurerm_aadb2c_directory" "azb2c_tenant" {
   domain_name             = var.domain_name
   country_code            = "US"
   data_residency_location = "United States"
-  sku_name                = "PremiumP1"
+  sku_name                = "PremiumP2"
 }
 
 # Create an Application Registration used for application login in Azure B2C Directory
 # https://learn.microsoft.com/en-us/azure/active-directory-b2c/tutorial-register-applications?tabs=app-reg-ga
 resource "azuread_application" "general" {
   display_name    = var.app_display_name
-  identifier_uris = ["api://testshitttt2"]
+  identifier_uris = ["api://testit22"]
   #logo_image       = filebase64("/path/to/logo.png")
   owners           = [data.azuread_client_config.current.object_id]
   sign_in_audience = "AzureADMultipleOrgs"
@@ -40,25 +40,30 @@ resource "azuread_application" "general" {
     resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 
     resource_access {
-      id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids["IdentityUserFlow.ReadWrite.All"]
+      id   = azuread_service_principal.msgraph.app_role_ids["IdentityUserFlow.ReadWrite.All"]
       type = "Scope"
     }
 
     resource_access {
-      id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids["Organization.ReadWrite.All"]
+      id   = azuread_service_principal.msgraph.app_role_ids["Organization.ReadWrite.All"]
       type = "Scope"
     }
 
     resource_access {
-      id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids["Application.Read.All"]
+      id   = azuread_service_principal.msgraph.app_role_ids["Application.Read.All"]
       type = "Scope"
     }
 
     resource_access {
-      id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids["Application.ReadWrite.All"]
+      id   = azuread_service_principal.msgraph.app_role_ids["Application.ReadWrite.All"]
       type = "Scope"
     }
 
+    resource_access {
+      id   = azuread_service_principal.msgraph.app_role_ids["Policy.ReadWrite.ConditionalAccess"]
+      type = "Scope"
+    }
+    
     resource_access {
       id   = azuread_service_principal.msgraph.oauth2_permission_scope_ids["offline_access"]
       type = "Scope"
@@ -69,6 +74,8 @@ resource "azuread_application" "general" {
       type = "Scope"
     }
   }
+
+  depends_on = [ azurerm_aadb2c_directory.azb2c_tenant ]
 }
 
 # Required to get the Application's Object ID for Granting Admin Consent
@@ -103,3 +110,39 @@ resource "azuread_application_password" "general" {
   }
 }
 
+resource "azuread_conditional_access_policy" "general" {
+  display_name = var.cap_policy_name
+  state        = var.cap_state
+
+  conditions {
+    client_app_types    = ["all"]
+    sign_in_risk_levels = ["medium"]
+    user_risk_levels    = ["medium"]
+
+    applications {
+      included_applications = ["All"]
+      excluded_applications = []
+    }
+
+    locations {
+      included_locations = ["All"]
+      excluded_locations = ["AllTrusted"]
+    }
+
+    platforms {
+      included_platforms = ["all"]
+      excluded_platforms = ["unknownFutureValue"]
+    }
+
+    users {
+      included_users = ["All"]
+      excluded_users = ["GuestsOrExternalUsers"]
+    }
+  }
+
+  grant_controls {
+    operator          = "OR"
+    built_in_controls = ["mfa"]
+  }
+
+}

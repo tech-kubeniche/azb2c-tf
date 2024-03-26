@@ -13,7 +13,9 @@ Param (
 # $ErrorActionPreference = "Stop"
 
 $RootPath = Resolve-Path -Path (Join-Path $PSScriptRoot "..")
-Import-Module (Join-Path $RootPath "/terraform/ps1_modules/functions.psm1") -Force -Verbose:$false
+Write-Host "RootPath: $RootPath"
+
+Import-Module (Join-Path $RootPath "\azb2c-tf\ps1_modules\functions.psm1") -Force -Verbose:$true
 
 $context = Get-Content -Path "config.json" | ConvertFrom-Json -AsHashtable
 
@@ -24,7 +26,7 @@ Write-Host $context
 try {
     $parameters = @{
         tags                  = @{ purpose = 'Azure AD B2C App' }
-        azureADB2Cname        = $context.AzureADB2C.domainName
+        azureADB2Cname        = $domainName
         azureADB2CDisplayName = $context.AzureADB2C.name
         skuName               = $context.AzureADB2C.skuName
         skuTier               = $context.AzureADB2C.skuTier
@@ -67,9 +69,9 @@ try {
             $tenantId = (Invoke-RestMethod -Uri "https://graph.microsoft.com/v1.0/organization" -Headers $headers -Method GET -SkipHttpErrorCheck -Verbose:$false).Value.id
 
             if ($context.AzureADB2C.Contains('branding')) {
-                $result = Set-AzADB2CBranding -accessToken $secureAccessToken -branding ($context.AzureADB2C.branding | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable) -tenantId $tenantId -tenantDomain $context.AzureADB2C.domainName -logoPath $logo -backgroundPath $background
+                $result = Set-AzADB2CBranding -accessToken $secureAccessToken -branding ($context.AzureADB2C.branding | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable) -tenantId $tenantId -tenantDomain $domainName -logoPath $logo -backgroundPath $background
                 if ($result -eq $true) {
-                    Write-Host "✅  Applied Azure AD B2C branding to $($context.AzureADB2C.domainName)`r`n"
+                    Write-Host "✅  Applied Azure AD B2C branding to $($domainName)`r`n"
                 }
                 else {
                     # Soft warning on branding because it's not mission critical
@@ -79,9 +81,9 @@ try {
             
             # User Flows
             if ($context.AzureADB2C.Contains('userFlows')) {
-                $result = Set-AzADB2CUserFlows -accessToken $secureAccessToken -userFlows ($context.AzureADB2C.userFlows | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable) -tenantId $tenantId -tenantDomain $context.AzureADB2C.domainName
+                $result = Set-AzADB2CUserFlows -accessToken $secureAccessToken -userFlows ($context.AzureADB2C.userFlows | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable) -tenantId $tenantId -tenantDomain $domainName
                 if ($result -eq $true) {
-                    Write-Host "✅  Created/updated Azure AD B2C User Flow $($context.AzureADB2C.domainName)`r`n"
+                    Write-Host "✅  Created/updated Azure AD B2C User Flow $($domainName)`r`n"
                 }
                 else {
                     throw $result
@@ -91,9 +93,9 @@ try {
             # User Flow attributes
             if ($context.AzureADB2C.Contains('userFlowAttributes') -and $context.AzureADB2C.Contains('userFlows')) {
                 foreach ($userFlow in $context.AzureADB2C.userFlows) {
-                    $result = Set-AzADB2CUserFlowAttributes -accessToken $secureAccessToken -userFlow $userFlow.id -userFlowAttributes ($context.AzureADB2C.userFlowAttributes | ConvertTo-Json -Depth 100 | ConvertFrom-Json) -tenantId $tenantId -tenantDomain $context.AzureADB2C.domainName
+                    $result = Set-AzADB2CUserFlowAttributes -accessToken $secureAccessToken -userFlow $userFlow.id -userFlowAttributes ($context.AzureADB2C.userFlowAttributes | ConvertTo-Json -Depth 100 | ConvertFrom-Json) -tenantId $tenantId -tenantDomain $domainName
                     if ($result -eq $true) {
-                        Write-Host "✅  Created/updated Azure AD B2C User Flow Attributes $($context.AzureADB2C.domainName)/$($userFlow.id)`r`n"
+                        Write-Host "✅  Created/updated Azure AD B2C User Flow Attributes $($domainName)/$($userFlow.id)`r`n"
                     }
                     else {
                         throw $result
@@ -105,7 +107,7 @@ try {
             
             # Azure App Registrations
             if ($context.AzureADB2C.Contains('appRegistrations')) {
-                $result, $clientIds = Set-AzADB2CAppRegistrations -accessToken $secureAccessToken -appRegistrations ($context.AzureADB2C.appRegistrations | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable) -tenantId $tenantId -tenantDomain $context.AzureADB2C.domainName
+                $result, $clientIds = Set-AzADB2CAppRegistrations -accessToken $secureAccessToken -appRegistrations ($context.AzureADB2C.appRegistrations | ConvertTo-Json -Depth 100 | ConvertFrom-Json -AsHashtable) -tenantId $tenantId -tenantDomain $domainName
                 if ($result -eq $true) {
                     Write-Host "✅  Successfully created Azure AD B2C app registrations $($context.AzureADB2C.appRegistrations.displayName)"
                 }
@@ -113,6 +115,8 @@ try {
                     throw $clientIds
                 }
             }
+
+            
         }
     }
     else {

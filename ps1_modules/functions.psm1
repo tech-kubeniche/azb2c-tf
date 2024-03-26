@@ -146,8 +146,6 @@ function Set-AzADB2CAppRegistrations(
     }
   }
 }
-
-
 function Set-AzADB2CBranding(
   [Parameter(Mandatory = $true)]
   [hashtable]$branding, 
@@ -216,7 +214,6 @@ function Set-AzADB2CBranding(
     }
   }
 }
-
 function Set-AzADB2CUserFlowAttributes(
   [Parameter(Mandatory = $true)]
   [object[]]$userFlowAttributes, 
@@ -266,4 +263,4 @@ function Set-AzADB2CUserFlowAttributes(
   }
 }
 
-Export-ModuleMember -Function * -Verbose:$false
+Export-ModuleMember -Function * -Verbose:$true

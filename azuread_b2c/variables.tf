@@ -14,5 +14,16 @@ variable "domain_name" {
 
 variable "app_display_name" {
   type        = string
-  description = "Provides the name for an Application Registration."
+  description = "Provide the name for the Application Registration."
+}
+
+variable "cap_policy_name" {
+  type        = string
+  description = "Provide the name for the conditional acces policy."
+}
+
+variable "cap_state" {
+  type        = string
+  description = "Set the State for this CAP , Specifies the state of the policy object. Possible values are: enabled, disabled and enabledForReportingButNotEnforced."
+  default = "enabledForReportingButNotEnforced"
 }
